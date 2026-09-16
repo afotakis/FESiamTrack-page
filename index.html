@@ -10,6 +10,7 @@
   <title>FESiamTrack | Enhancing Event-Frame Feature Tracking with Siamese FPN</title>
   <link rel="stylesheet" href="style.css" />
 
+  <!-- MathJax renders the tracking update directly from LaTeX. -->
   <script>
     window.MathJax = {
       tex: {
@@ -34,9 +35,9 @@
       <p class="affiliation">Dept. of Computer Engineering &amp; Informatics, University of Patras, Greece</p>
 
       <div class="hero-links">
-        <a class="pill" data-doc-link="paper" href="docs/ECCV_2026_Workshop_EBMV_Fotakis_Psarakis.pdf" target="_blank" rel="noopener">Paper</a>
+        <a class="pill" href="https://github.com/afotakis/FESiamTrack/blob/main/doc/ECCV_2026_Workshop_EBMV_Fotakis_Psarakis.pdf" target="_blank" rel="noopener">Paper</a>
         <a class="pill" href="https://github.com/afotakis/FESiamTrack" target="_blank" rel="noopener">Code</a>
-        <a class="pill" data-doc-link="poster" href="docs/poster.png" target="_blank" rel="noopener">Poster</a>
+        <a class="pill" id="poster-link" href="#poster">Poster</a>
         <a class="pill" href="#bibtex">BibTeX</a>
       </div>
     </div>
@@ -94,9 +95,9 @@
           <h2>System Architecture</h2>
         </div>
 
-        <figure class="paper-figure wide-figure asset-frame">
-          <img id="architecture-image" data-doc-asset="system-architecture" alt="System architecture and Frame Attention Module" />
-          <div class="asset-loading" aria-hidden="true">Loading architecture from <code>docs/</code>…</div>
+        <figure class="paper-figure wide-figure repo-figure" data-repo-figure="system-architecture">
+          <div class="asset-loading">Loading architecture from <code>docs/</code>…</div>
+          <img alt="System architecture and Frame Attention Module" hidden />
         </figure>
 
         <div class="method-layout">
@@ -116,10 +117,8 @@
             <div class="equation" aria-label="Feature position update equation">
               \[
                 \hat{\mathbf{x}}_{f_l}(t_j)
-                =
-                \hat{\mathbf{x}}_{f_l}(t_{j-1})
-                +
-                \Delta\hat{\mathbf{x}}_{f_l}(t_j)
+                = \hat{\mathbf{x}}_{f_l}(t_{j-1})
+                + \Delta\hat{\mathbf{x}}_{f_l}(t_j)
               \]
             </div>
             <ul class="method-list continuation">
@@ -127,9 +126,9 @@
             </ul>
           </div>
 
-          <figure class="paper-figure fpn-figure asset-frame">
-            <img id="siamese-fpn-image" data-doc-asset="siamese-fpn" alt="Siamese shared-weight FPN" />
-            <div class="asset-loading" aria-hidden="true">Loading Siamese FPN from <code>docs/</code>…</div>
+          <figure class="paper-figure fpn-figure repo-figure" data-repo-figure="siamese-fpn">
+            <div class="asset-loading">Loading Siamese FPN figure from <code>docs/</code>…</div>
+            <img alt="Siamese shared-weight FPN" hidden />
             <figcaption>Siamese Shared-Weight FPN</figcaption>
           </figure>
         </div>
@@ -141,39 +140,46 @@
         <div class="section-heading">
           <span class="eyebrow">Qualitative Results</span>
           <h2>Tracking Videos</h2>
-          <p>Visualizations are loaded from the <code>docs/</code> folder of the FESiamTrack project-page repository.</p>
+          <p>Sequences are loaded from <code>docs/FESiamTrack results/</code> in this project-page repository.</p>
         </div>
 
-        <div class="cross-dataset-grid" id="cross-dataset-examples" aria-label="Cross-dataset examples"></div>
+        <div id="cross-dataset-block" class="cross-dataset-block" hidden>
+          <h3 class="dataset-heading">Additional datasets</h3>
+          <div id="cross-dataset-grid" class="video-grid video-grid-large"></div>
+        </div>
 
-        <div class="dataset-results-block">
-          <div class="dataset-heading">
+        <div class="dataset-slider-block">
+          <div class="dataset-title-row">
             <div>
-              <span class="eyebrow">EDS</span>
-              <h3>Event-based Dataset and Simulator</h3>
+              <span class="dataset-kicker">Dataset</span>
+              <h3>EDS</h3>
             </div>
             <div class="slider-controls" data-controls-for="eds-slider" aria-label="EDS slider controls">
-              <button type="button" class="slider-btn" data-slider-prev aria-label="Previous EDS sequences">←</button>
-              <div class="slider-dots" data-slider-dots></div>
-              <button type="button" class="slider-btn" data-slider-next aria-label="Next EDS sequences">→</button>
+              <button class="slider-button" type="button" data-direction="prev" aria-label="Previous EDS sequences">‹</button>
+              <div class="slider-dots" aria-hidden="true"></div>
+              <button class="slider-button" type="button" data-direction="next" aria-label="Next EDS sequences">›</button>
             </div>
           </div>
-          <div class="dataset-slider" id="eds-slider" data-dataset="EDS"></div>
+          <div id="eds-slider" class="sequence-slider" data-dataset="EDS">
+            <div class="asset-loading">Loading all EDS sequences from <code>docs/FESiamTrack results/</code>…</div>
+          </div>
         </div>
 
-        <div class="dataset-results-block">
-          <div class="dataset-heading">
+        <div class="dataset-slider-block">
+          <div class="dataset-title-row">
             <div>
-              <span class="eyebrow">EC</span>
-              <h3>Event Camera Dataset</h3>
+              <span class="dataset-kicker">Dataset</span>
+              <h3>EC</h3>
             </div>
             <div class="slider-controls" data-controls-for="ec-slider" aria-label="EC slider controls">
-              <button type="button" class="slider-btn" data-slider-prev aria-label="Previous EC sequences">←</button>
-              <div class="slider-dots" data-slider-dots></div>
-              <button type="button" class="slider-btn" data-slider-next aria-label="Next EC sequences">→</button>
+              <button class="slider-button" type="button" data-direction="prev" aria-label="Previous EC sequences">‹</button>
+              <div class="slider-dots" aria-hidden="true"></div>
+              <button class="slider-button" type="button" data-direction="next" aria-label="Next EC sequences">›</button>
             </div>
           </div>
-          <div class="dataset-slider" id="ec-slider" data-dataset="EC"></div>
+          <div id="ec-slider" class="sequence-slider" data-dataset="EC">
+            <div class="asset-loading">Loading all EC sequences from <code>docs/FESiamTrack results/</code>…</div>
+          </div>
         </div>
       </div>
     </section>
@@ -186,9 +192,9 @@
           <p>The proposed pipeline substantially improves over DDFT on both real datasets and achieves the best event-frame performance on EC.</p>
         </div>
 
-        <figure class="results-figure asset-frame">
-          <img id="benchmark-results-svg" data-doc-asset="benchmark-table" alt="Benchmarking results table" />
-          <div class="asset-loading" aria-hidden="true">Loading benchmark SVG from <code>docs/</code>…</div>
+        <figure class="results-svg repo-figure" data-repo-figure="benchmark-results">
+          <div class="asset-loading">Loading benchmarking SVG from <code>docs/</code>…</div>
+          <img alt="Benchmarking results table" hidden />
         </figure>
         <p class="result-note">The most recent event-only methods still obtain the highest overall scores, especially on EDS.</p>
       </div>
@@ -201,9 +207,9 @@
           <h2>Ablation Results</h2>
         </div>
 
-        <figure class="results-figure asset-frame">
-          <img id="ablation-results-svg" data-doc-asset="ablation-table" alt="Ablation results table" />
-          <div class="asset-loading" aria-hidden="true">Loading ablation SVG from <code>docs/</code>…</div>
+        <figure class="results-svg repo-figure" data-repo-figure="ablation-results">
+          <div class="asset-loading">Loading ablation SVG from <code>docs/</code>…</div>
+          <img alt="Ablation results table" hidden />
         </figure>
       </div>
     </section>
@@ -228,9 +234,9 @@
           <span class="eyebrow">ECCV 2026</span>
           <h2>Poster</h2>
         </div>
-        <a class="poster-preview asset-frame" data-doc-link="poster" href="docs/poster.png" target="_blank" rel="noopener">
-          <img id="poster-image" data-doc-asset="poster" alt="ECCV 2026 poster for Enhancing Event-Frame Feature Tracking with Siamese FPN" />
-          <div class="asset-loading" aria-hidden="true">Loading poster from <code>docs/</code>…</div>
+        <a class="poster-preview repo-figure" data-repo-figure="poster" href="#" target="_blank" rel="noopener">
+          <div class="asset-loading">Loading poster from <code>docs/</code>…</div>
+          <img alt="ECCV 2026 poster for Enhancing Event-Frame Feature Tracking with Siamese FPN" hidden />
         </a>
       </div>
     </section>

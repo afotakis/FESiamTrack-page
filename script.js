@@ -1,9 +1,3 @@
-const REPO_OWNER = 'afotakis';
-const REPO_NAME = 'FESiamTrack-page';
-const REPO_BRANCH = 'main';
-const DOCS_PREFIX = 'docs/';
-const RESULTS_FOLDER_HINT = 'fesiamtrack results';
-
 const copyButton = document.querySelector('[data-copy-target]');
 
 if (copyButton) {
@@ -23,351 +17,358 @@ if (copyButton) {
   });
 }
 
+/*
+ * Repository-backed assets
+ * ------------------------
+ * The page intentionally does not duplicate the paper figures/results locally.
+ * It discovers the real files under docs/ in afotakis/FESiamTrack-page and then
+ * uses relative docs/... URLs, so the deployed GitHub Pages site serves the
+ * repository files directly.
+ */
+const REPO = {
+  owner: 'afotakis',
+  name: 'FESiamTrack-page',
+  branch: 'main',
+  docsRoot: 'docs/',
+  resultsRoot: 'docs/FESiamTrack results/'
+};
+
 const DATASETS = {
   EDS: [
-    { name: 'peanuts_light_160_386', aliases: ['peanuts_light_160_386', 'peanuts_light'] },
-    { name: 'rocket_earth_light_338_438', aliases: ['rocket_earth_light_338_438', 'rocket_earth_light'] },
-    { name: 'ziggy_in_the_arena_1350_1650', aliases: ['ziggy_in_the_arena_1350_1650', 'ziggy_in_the_arena', 'ziggy'] },
-    { name: 'peanuts_running_2360_2460', aliases: ['peanuts_running_2360_2460', 'peanuts_running'] }
+    { name: 'peanuts_light_160_386', keys: ['peanuts_light_160_386', 'peanuts_light'] },
+    { name: 'rocket_earth_light_338_438', keys: ['rocket_earth_light_338_438', 'rocket_earth_light'] },
+    { name: 'ziggy_in_the_arena_1350_1650', keys: ['ziggy_in_the_arena_1350_1650', 'ziggy_in_the_arena', 'ziggy'] },
+    { name: 'peanuts_running_2360_2460', keys: ['peanuts_running_2360_2460', 'peanuts_running'] }
   ],
   EC: [
-    { name: 'shapes_translation_8_88', aliases: ['shapes_translation_8_88', 'shapes_translation'] },
-    { name: 'shapes_rotation_165_245', aliases: ['shapes_rotation_165_245', 'shapes_rotation'] },
-    { name: 'shapes_6dof_485_565', aliases: ['shapes_6dof_485_565', 'shapes_6dof'] },
-    { name: 'boxes_translation_330_410', aliases: ['boxes_translation_330_410', 'boxes_translation'] },
-    { name: 'boxes_rotation_198_278', aliases: ['boxes_rotation_198_278', 'boxes_rotation'] }
+    { name: 'shapes_translation_8_88', keys: ['shapes_translation_8_88', 'shapes_translation'] },
+    { name: 'shapes_rotation_165_245', keys: ['shapes_rotation_165_245', 'shapes_rotation'] },
+    { name: 'shapes_6dof_485_565', keys: ['shapes_6dof_485_565', 'shapes_6dof'] },
+    { name: 'boxes_translation_330_410', keys: ['boxes_translation_330_410', 'boxes_translation'] },
+    { name: 'boxes_rotation_198_278', keys: ['boxes_rotation_198_278', 'boxes_rotation'] }
   ]
 };
 
-const CROSS_DATASET = [
-  { dataset: 'TUM-VIE', name: 'mocap-6dof', aliases: ['mocap-6dof', 'mocap_6dof'] },
-  { dataset: 'VECtor', name: 'robot-normal', aliases: ['robot-normal', 'robot_normal'] }
+const CROSS_DATASETS = [
+  { dataset: 'TUM-VIE', name: 'mocap-6dof', keys: ['mocap-6dof', 'mocap_6dof'] },
+  { dataset: 'VECtor', name: 'robot-normal', keys: ['robot-normal', 'robot_normal'] }
 ];
 
-function normalize(value = '') {
-  return decodeURIComponent(value)
-    .toLowerCase()
-    .replace(/\\/g, '/')
-    .replace(/[_\-\s]+/g, ' ')
-    .replace(/[^a-z0-9./ ]+/g, '')
-    .trim();
-}
+const MEDIA_EXTENSIONS = ['.gif', '.mp4', '.webm', '.png', '.jpg', '.jpeg'];
+const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 
-function compact(value = '') {
-  return normalize(value).replace(/[^a-z0-9]+/g, '');
-}
+const normalize = (value) => value
+  .toLowerCase()
+  .replace(/%20/g, ' ')
+  .replace(/[\\/\-.]+/g, '_')
+  .replace(/[^a-z0-9_ ]+/g, '')
+  .replace(/\s+/g, '_');
 
-function extension(path = '') {
-  const match = path.toLowerCase().match(/\.[a-z0-9]+$/);
-  return match ? match[0] : '';
-}
+const pathExtension = (path) => {
+  const clean = path.split('?')[0].toLowerCase();
+  const dot = clean.lastIndexOf('.');
+  return dot >= 0 ? clean.slice(dot) : '';
+};
 
-function localDocsUrl(path) {
-  const docsIndex = path.toLowerCase().indexOf(DOCS_PREFIX);
-  const local = docsIndex >= 0 ? path.slice(docsIndex) : path;
-  return encodeURI(local);
-}
+const isUnder = (path, root) => path.toLowerCase().startsWith(root.toLowerCase());
 
-async function getRepoTree() {
-  const cacheKey = `fesiamtrack-page-tree-${REPO_BRANCH}`;
-  const cached = sessionStorage.getItem(cacheKey);
-  if (cached) {
-    try {
-      return JSON.parse(cached);
-    } catch {
-      sessionStorage.removeItem(cacheKey);
-    }
-  }
+const relativeAssetUrl = (path) => path
+  .split('/')
+  .map((part) => encodeURIComponent(part))
+  .join('/');
 
-  const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${REPO_BRANCH}?recursive=1`;
+async function fetchRepositoryTree() {
+  const url = `https://api.github.com/repos/${REPO.owner}/${REPO.name}/git/trees/${REPO.branch}?recursive=1`;
   const response = await fetch(url, { headers: { Accept: 'application/vnd.github+json' } });
-  if (!response.ok) throw new Error(`GitHub tree request failed (${response.status})`);
-
-  const data = await response.json();
-  const files = (data.tree || [])
-    .filter(item => item.type === 'blob' && item.path.toLowerCase().startsWith(DOCS_PREFIX))
-    .map(item => item.path);
-
-  sessionStorage.setItem(cacheKey, JSON.stringify(files));
-  return files;
+  if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
+  const payload = await response.json();
+  return (payload.tree || [])
+    .filter((entry) => entry.type === 'blob' && isUnder(entry.path, REPO.docsRoot))
+    .map((entry) => entry.path);
 }
 
-function rankedFind(files, options = {}) {
-  const {
-    extensions = [],
-    mustContain = [],
-    prefer = [],
-    avoid = [],
-    folderHint = null
-  } = options;
+function scorePath(path, positiveTerms, negativeTerms = []) {
+  const value = normalize(path);
+  let score = 0;
 
-  let candidates = files.filter(path => {
-    const ext = extension(path);
-    if (extensions.length && !extensions.includes(ext)) return false;
-    const n = normalize(path);
-    return mustContain.every(term => n.includes(normalize(term)));
+  positiveTerms.forEach(([term, weight]) => {
+    if (value.includes(normalize(term))) score += weight;
+  });
+  negativeTerms.forEach(([term, weight]) => {
+    if (value.includes(normalize(term))) score -= weight;
   });
 
-  if (folderHint) {
-    const folderMatches = candidates.filter(path => normalize(path).includes(normalize(folderHint)));
-    if (folderMatches.length) candidates = folderMatches;
-  }
-
-  return candidates
-    .map(path => {
-      const n = normalize(path);
-      let score = 0;
-      prefer.forEach((term, index) => {
-        if (n.includes(normalize(term))) score += 20 - Math.min(index, 10);
-      });
-      avoid.forEach(term => {
-        if (n.includes(normalize(term))) score -= 40;
-      });
-      if (n.startsWith('docs/')) score += 2;
-      return { path, score };
-    })
-    .sort((a, b) => b.score - a.score || a.path.localeCompare(b.path))[0]?.path || null;
+  return score;
 }
 
-function findByAliases(files, aliases, dataset = null, extensions = ['.gif', '.mp4', '.webm']) {
-  const aliasCompacts = aliases.map(compact);
-  let candidates = files.filter(path => {
-    if (!extensions.includes(extension(path))) return false;
-    const p = compact(path);
-    return aliasCompacts.some(alias => p.includes(alias));
-  });
+function bestMatch(paths, extensions, positiveTerms, negativeTerms = []) {
+  const candidates = paths
+    .filter((path) => extensions.includes(pathExtension(path)))
+    .map((path) => ({ path, score: scorePath(path, positiveTerms, negativeTerms) }))
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score || a.path.localeCompare(b.path));
 
-  const resultFolder = candidates.filter(path => normalize(path).includes(RESULTS_FOLDER_HINT));
-  if (resultFolder.length) candidates = resultFolder;
-
-  if (dataset) {
-    const datasetMatches = candidates.filter(path => normalize(path).includes(normalize(dataset)));
-    if (datasetMatches.length) candidates = datasetMatches;
-  }
-
-  return candidates.sort((a, b) => a.length - b.length || a.localeCompare(b))[0] || null;
+  return candidates[0]?.path || null;
 }
 
-function markAssetReady(img, path) {
-  if (!img || !path) return;
-  img.src = localDocsUrl(path);
-  img.closest('.asset-frame')?.classList.add('asset-resolved');
+function findSequenceAsset(paths, sequence) {
+  const resultFiles = paths.filter((path) =>
+    isUnder(path, REPO.resultsRoot) && MEDIA_EXTENSIONS.includes(pathExtension(path))
+  );
+
+  const normalizedKeys = sequence.keys.map(normalize);
+  const exact = resultFiles.find((path) => {
+    const p = normalize(path);
+    return normalizedKeys.some((key) => p.includes(key));
+  });
+
+  return exact || null;
 }
 
-function resolveStaticAssets(files) {
-  const pngLike = ['.png', '.jpg', '.jpeg', '.webp'];
+function setFigureAsset(wrapper, path) {
+  if (!wrapper || !path) return false;
+  const img = wrapper.querySelector('img');
+  const loading = wrapper.querySelector('.asset-loading');
+  if (!img) return false;
 
-  let architecture = rankedFind(files, {
-    extensions: ['.png'],
-    mustContain: ['architecture'],
-    prefer: ['system architecture', 'system', 'architecture'],
-    avoid: ['poster', 'ablation', 'benchmark', 'result', 'table']
-  });
-  if (!architecture) {
-    architecture = rankedFind(files, {
-      extensions: ['.png'],
-      prefer: ['architecture', 'system', 'fam'],
-      avoid: ['poster', 'ablation', 'benchmark', 'result', 'table', 'siamese']
-    });
-  }
+  const url = relativeAssetUrl(path);
+  img.src = url;
+  img.hidden = false;
+  if (loading) loading.remove();
 
-  let siameseFpn = rankedFind(files, {
-    extensions: ['.png'],
-    prefer: ['siamese fpn', 'siamese', 'shared weight', 'shared', 'fpn'],
-    avoid: ['poster', 'ablation', 'benchmark', 'result', 'table']
-  });
+  if (wrapper.matches('a')) wrapper.href = url;
+  return true;
+}
 
-  const svgFiles = files.filter(path => extension(path) === '.svg');
-  let benchmark = rankedFind(svgFiles, {
-    extensions: ['.svg'],
-    prefer: ['benchmarking results', 'benchmark results', 'benchmark', 'main results', 'results'],
-    avoid: ['ablation']
-  });
-  let ablation = rankedFind(svgFiles, {
-    extensions: ['.svg'],
-    prefer: ['ablation results', 'ablation'],
-    avoid: ['benchmark']
-  });
-
-  if ((!benchmark || !ablation) && svgFiles.length === 2) {
-    benchmark ||= svgFiles[0];
-    ablation ||= svgFiles.find(path => path !== benchmark) || svgFiles[1];
-  }
-
-  const poster = rankedFind(files, {
-    extensions: pngLike,
-    prefer: ['poster', 'eccv'],
-    avoid: ['architecture', 'table', 'benchmark', 'ablation']
-  });
-
-  const paper = rankedFind(files, {
-    extensions: ['.pdf'],
-    prefer: ['eccv', 'workshop', 'fotakis', 'psarakis', 'paper']
-  });
-
-  markAssetReady(document.getElementById('architecture-image'), architecture);
-  markAssetReady(document.getElementById('siamese-fpn-image'), siameseFpn);
-  markAssetReady(document.getElementById('benchmark-results-svg'), benchmark);
-  markAssetReady(document.getElementById('ablation-results-svg'), ablation);
-  markAssetReady(document.getElementById('poster-image'), poster);
-
-  if (paper) {
-    document.querySelectorAll('[data-doc-link="paper"]').forEach(link => {
-      link.href = localDocsUrl(paper);
-    });
-  }
-
-  if (poster) {
-    document.querySelectorAll('[data-doc-link="poster"]').forEach(link => {
-      link.href = localDocsUrl(poster);
-    });
+function showAssetError(wrapper, message) {
+  if (!wrapper) return;
+  const loading = wrapper.querySelector('.asset-loading');
+  if (loading) {
+    loading.classList.add('asset-error');
+    loading.textContent = message;
   }
 }
 
-function createMediaElement(path, alt) {
-  if (!path) {
-    const placeholder = document.createElement('div');
-    placeholder.className = 'media-missing';
-    placeholder.textContent = 'Visualization not found in docs/FESiamTrack results';
-    return placeholder;
-  }
+function resolveFigures(paths) {
+  const docsPngs = paths.filter((p) => isUnder(p, REPO.docsRoot) && pathExtension(p) === '.png');
+  const docsSvgs = paths.filter((p) => isUnder(p, REPO.docsRoot) && pathExtension(p) === '.svg');
 
-  const url = localDocsUrl(path);
-  if (['.mp4', '.webm'].includes(extension(path))) {
+  const figureMatches = {
+    'system-architecture': bestMatch(
+      docsPngs,
+      ['.png'],
+      [['system architecture', 20], ['architecture', 12], ['system', 5], ['frame attention', 3]],
+      [['siamese', 8], ['poster', 10], ['result', 4]]
+    ),
+    'siamese-fpn': bestMatch(
+      docsPngs,
+      ['.png'],
+      [['siamese fpn', 20], ['siamese', 12], ['fpn', 10], ['shared weight', 4], ['feature network', 3]],
+      [['poster', 10], ['result', 4]]
+    ),
+    'benchmark-results': bestMatch(
+      docsSvgs,
+      ['.svg'],
+      [['benchmarking results', 25], ['benchmark', 18], ['results', 7], ['table', 3]],
+      [['ablation', 30]]
+    ),
+    'ablation-results': bestMatch(
+      docsSvgs,
+      ['.svg'],
+      [['ablation results', 25], ['ablation', 20], ['results', 6], ['table', 3]]
+    ),
+    poster: bestMatch(
+      paths.filter((p) => isUnder(p, REPO.docsRoot)),
+      IMAGE_EXTENSIONS,
+      [['poster', 20], ['eccv', 4]],
+      [['architecture', 4], ['result', 4]]
+    )
+  };
+
+  Object.entries(figureMatches).forEach(([kind, path]) => {
+    const wrapper = document.querySelector(`[data-repo-figure="${kind}"]`);
+    if (!wrapper) return;
+    if (!setFigureAsset(wrapper, path)) {
+      showAssetError(wrapper, `Could not automatically locate the ${kind.replaceAll('-', ' ')} file in docs/.`);
+    }
+  });
+
+  const posterLink = document.getElementById('poster-link');
+  if (posterLink && figureMatches.poster) {
+    posterLink.href = relativeAssetUrl(figureMatches.poster);
+    posterLink.target = '_blank';
+    posterLink.rel = 'noopener';
+  }
+}
+
+function createMedia(path, alt) {
+  const ext = pathExtension(path);
+  const url = relativeAssetUrl(path);
+
+  if (ext === '.mp4' || ext === '.webm') {
     const video = document.createElement('video');
     video.src = url;
     video.autoplay = true;
-    video.loop = true;
     video.muted = true;
+    video.loop = true;
     video.playsInline = true;
-    video.controls = true;
+    video.preload = 'metadata';
     video.setAttribute('aria-label', alt);
     return video;
   }
 
-  const image = document.createElement('img');
-  image.src = url;
-  image.alt = alt;
-  image.loading = 'lazy';
-  return image;
+  const img = document.createElement('img');
+  img.src = url;
+  img.alt = alt;
+  img.loading = 'lazy';
+  return img;
 }
 
-function createVideoCard(dataset, sequenceName, mediaPath) {
+function createSequenceCard(dataset, sequence, path) {
   const figure = document.createElement('figure');
   figure.className = 'video-card';
-  figure.appendChild(createMediaElement(mediaPath, `FESiamTrack on ${dataset} ${sequenceName}`));
+
+  figure.appendChild(createMedia(path, `${dataset} ${sequence}`));
 
   const caption = document.createElement('figcaption');
-  const datasetLabel = document.createElement('strong');
-  datasetLabel.textContent = dataset;
-  const sequenceLabel = document.createElement('span');
-  sequenceLabel.textContent = sequenceName;
-  caption.append(datasetLabel, sequenceLabel);
+  const datasetName = document.createElement('strong');
+  datasetName.textContent = dataset;
+  const sequenceName = document.createElement('span');
+  sequenceName.textContent = sequence;
+  caption.append(datasetName, sequenceName);
   figure.appendChild(caption);
+
   return figure;
 }
 
-function renderCrossDataset(files) {
-  const target = document.getElementById('cross-dataset-examples');
-  if (!target) return;
-  target.innerHTML = '';
-
-  CROSS_DATASET.forEach(item => {
-    const mediaPath = findByAliases(files, item.aliases, item.dataset);
-    target.appendChild(createVideoCard(item.dataset, item.name, mediaPath));
-  });
+function chunks(array, size) {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) result.push(array.slice(i, i + size));
+  return result;
 }
 
-function renderDatasetSlider(files, dataset, targetId) {
-  const target = document.getElementById(targetId);
-  if (!target) return;
-  target.innerHTML = '';
+function setSliderState(slider, index) {
+  const slides = [...slider.querySelectorAll('.sequence-slide')];
+  if (!slides.length) return;
 
-  const items = DATASETS[dataset].map(item => ({
-    ...item,
-    mediaPath: findByAliases(files, item.aliases, dataset)
-  }));
+  const normalizedIndex = (index + slides.length) % slides.length;
+  slider.dataset.index = String(normalizedIndex);
+  slides.forEach((slide, i) => slide.classList.toggle('is-active', i === normalizedIndex));
 
-  const pages = [];
-  for (let i = 0; i < items.length; i += 3) pages.push(items.slice(i, i + 3));
+  const controls = document.querySelector(`[data-controls-for="${slider.id}"]`);
+  if (controls) {
+    [...controls.querySelectorAll('.slider-dot')]
+      .forEach((dot, i) => dot.classList.toggle('is-active', i === normalizedIndex));
 
-  const track = document.createElement('div');
-  track.className = 'slider-track';
+    controls.hidden = slides.length <= 1;
+  }
+}
 
-  pages.forEach((page, pageIndex) => {
+function buildSlider(slider, dataset, items) {
+  slider.innerHTML = '';
+
+  if (!items.length) {
+    slider.innerHTML = `<div class="asset-loading asset-error">No ${dataset} sequence files were found under <code>${REPO.resultsRoot}</code>.</div>`;
+    return;
+  }
+
+  const pages = chunks(items, 3);
+  pages.forEach((pageItems, pageIndex) => {
     const slide = document.createElement('div');
-    slide.className = 'slider-page';
-    slide.dataset.slideIndex = pageIndex;
-    page.forEach(item => slide.appendChild(createVideoCard(dataset, item.name, item.mediaPath)));
-    track.appendChild(slide);
+    slide.className = `sequence-slide${pageIndex === 0 ? ' is-active' : ''}`;
+    const grid = document.createElement('div');
+    grid.className = 'video-grid sequence-grid';
+
+    pageItems.forEach(({ sequence, path }) => {
+      grid.appendChild(createSequenceCard(dataset, sequence.name, path));
+    });
+
+    slide.appendChild(grid);
+    slider.appendChild(slide);
   });
 
-  target.appendChild(track);
-  setupSlider(targetId, pages.length);
+  const controls = document.querySelector(`[data-controls-for="${slider.id}"]`);
+  if (controls) {
+    const dots = controls.querySelector('.slider-dots');
+    dots.innerHTML = '';
+
+    pages.forEach((_, index) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = `slider-dot${index === 0 ? ' is-active' : ''}`;
+      dot.setAttribute('aria-label', `Show ${dataset} sequence group ${index + 1}`);
+      dot.addEventListener('click', () => setSliderState(slider, index));
+      dots.appendChild(dot);
+    });
+
+    controls.querySelector('[data-direction="prev"]')?.addEventListener('click', () => {
+      const current = Number(slider.dataset.index || 0);
+      setSliderState(slider, current - 1);
+    });
+    controls.querySelector('[data-direction="next"]')?.addEventListener('click', () => {
+      const current = Number(slider.dataset.index || 0);
+      setSliderState(slider, current + 1);
+    });
+  }
+
+  slider.dataset.index = '0';
+  setSliderState(slider, 0);
 }
 
-function setupSlider(targetId, pageCount) {
-  const slider = document.getElementById(targetId);
-  const controls = document.querySelector(`[data-controls-for="${targetId}"]`);
-  if (!slider || !controls) return;
+function resolveDatasetSliders(paths) {
+  Object.entries(DATASETS).forEach(([dataset, sequences]) => {
+    const slider = document.getElementById(`${dataset.toLowerCase()}-slider`);
+    if (!slider) return;
 
-  const track = slider.querySelector('.slider-track');
-  const prev = controls.querySelector('[data-slider-prev]');
-  const next = controls.querySelector('[data-slider-next]');
-  const dots = controls.querySelector('[data-slider-dots]');
-  let current = 0;
+    const items = sequences
+      .map((sequence) => ({ sequence, path: findSequenceAsset(paths, sequence) }))
+      .filter((item) => item.path);
 
-  dots.innerHTML = '';
-  for (let i = 0; i < pageCount; i++) {
-    const dot = document.createElement('button');
-    dot.type = 'button';
-    dot.className = 'slider-dot';
-    dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
-    dot.addEventListener('click', () => goTo(i));
-    dots.appendChild(dot);
-  }
-
-  function update() {
-    track.style.transform = `translateX(-${current * 100}%)`;
-    prev.disabled = pageCount <= 1;
-    next.disabled = pageCount <= 1;
-    [...dots.children].forEach((dot, index) => dot.classList.toggle('active', index === current));
-  }
-
-  function goTo(index) {
-    if (pageCount <= 0) return;
-    current = (index + pageCount) % pageCount;
-    update();
-  }
-
-  prev.addEventListener('click', () => goTo(current - 1));
-  next.addEventListener('click', () => goTo(current + 1));
-  update();
-}
-
-function showAssetError(message) {
-  document.querySelectorAll('.asset-frame:not(.asset-resolved) .asset-loading').forEach(node => {
-    node.textContent = message;
-    node.classList.add('asset-error');
+    buildSlider(slider, dataset, items);
   });
 }
 
-async function initRepositoryAssets() {
+function resolveCrossDatasetExamples(paths) {
+  const block = document.getElementById('cross-dataset-block');
+  const grid = document.getElementById('cross-dataset-grid');
+  if (!block || !grid) return;
+
+  const items = CROSS_DATASETS
+    .map((entry) => ({
+      ...entry,
+      path: findSequenceAsset(paths, { keys: entry.keys })
+    }))
+    .filter((entry) => entry.path);
+
+  if (!items.length) return;
+
+  grid.innerHTML = '';
+  items.forEach((entry) => {
+    grid.appendChild(createSequenceCard(entry.dataset, entry.name, entry.path));
+  });
+  block.hidden = false;
+}
+
+async function initializeRepositoryAssets() {
   try {
-    const files = await getRepoTree();
-    resolveStaticAssets(files);
-    renderCrossDataset(files);
-    renderDatasetSlider(files, 'EDS', 'eds-slider');
-    renderDatasetSlider(files, 'EC', 'ec-slider');
-    showAssetError('Asset not found in docs/. Check the filename in the repository.');
+    const paths = await fetchRepositoryTree();
+    resolveFigures(paths);
+    resolveDatasetSliders(paths);
+    resolveCrossDatasetExamples(paths);
   } catch (error) {
-    console.error(error);
-    showAssetError('Could not read the docs/ asset list from GitHub.');
+    console.error('Unable to load repository assets:', error);
 
-    renderCrossDataset([]);
-    renderDatasetSlider([], 'EDS', 'eds-slider');
-    renderDatasetSlider([], 'EC', 'ec-slider');
+    document.querySelectorAll('.repo-figure').forEach((wrapper) => {
+      showAssetError(wrapper, 'Unable to load this asset from docs/.');
+    });
+
+    ['EDS', 'EC'].forEach((dataset) => {
+      const slider = document.getElementById(`${dataset.toLowerCase()}-slider`);
+      if (slider) {
+        slider.innerHTML = `<div class="asset-loading asset-error">Unable to read <code>${REPO.resultsRoot}</code>. ${error.message}</div>`;
+      }
+    });
   }
 }
 
-initRepositoryAssets();
+initializeRepositoryAssets();
