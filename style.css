@@ -116,6 +116,53 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
 .section-heading p { max-width: 780px; margin: 12px auto 0; color: var(--muted); font-size: 16px; }
 .abstract-text { margin: 0; color: #4f5c67; font-size: 17px; text-align: justify; }
 
+/* Featured qualitative examples shown immediately below the paper header.
+ * Four GIFs form the same two-row showcase used in the earlier version:
+ * TUM-VIE + VECtor on the first row, EDS + EC on the second. */
+.featured-results-section {
+  padding-top: 58px;
+  padding-bottom: 66px;
+  background: #fff;
+}
+.featured-results-section .section-heading { margin-bottom: 28px; }
+.featured-video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 28px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.featured-loading { grid-column: 1 / -1; }
+.featured-video-card {
+  margin: 0;
+  min-width: 0;
+}
+.featured-video-media {
+  overflow: hidden;
+  border-radius: 13px;
+  background: #0d1924;
+  box-shadow: 0 10px 30px rgba(22, 74, 112, .10);
+}
+.featured-video-media img,
+.featured-video-media video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: #0d1924;
+}
+.featured-video-card figcaption {
+  padding: 10px 8px 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.featured-video-card figcaption strong {
+  color: var(--blue-dark);
+  font-weight: 800;
+}
+
 .overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .info-card {
   padding: 25px 26px;
@@ -194,59 +241,101 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
 .video-card {
   margin: 0;
   overflow: hidden;
-  border: 1px solid #d5e3ec;
-  border-radius: 16px;
+  border-radius: 12px;
   background: #fff;
-  box-shadow: 0 9px 28px rgba(31,78,111,.07);
 }
 .video-card img,
-.video-card video { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: #0d1924; }
+.video-card video { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: #0d1924; border-radius: 10px; }
 .video-grid-large .video-card img,
 .video-grid-large .video-card video { aspect-ratio: 16 / 9; }
-.video-card figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 12px 14px; }
+.video-card figcaption { padding: 10px 4px 0; text-align: center; color: var(--muted); font-size: 14px; }
 .video-card figcaption strong { color: var(--blue-dark); }
-.video-card figcaption span { color: var(--muted); font-size: 13px; text-align: right; overflow-wrap: anywhere; }
+.video-card figcaption span { overflow-wrap: anywhere; }
 
-.cross-dataset-block { margin-bottom: 46px; }
-.dataset-heading { margin: 0 0 16px; color: var(--blue-dark); font-family: Georgia, "Times New Roman", serif; font-size: 25px; font-weight: 500; }
 .dataset-slider-block + .dataset-slider-block { margin-top: 56px; }
 .dataset-title-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
 .dataset-title-row h3 { margin: 1px 0 0; color: var(--blue-dark); font-family: Georgia, "Times New Roman", serif; font-size: 31px; font-weight: 500; }
 .dataset-kicker { color: var(--blue); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .14em; }
 
-/* Results carousels use Bulma Carousel, as in the Academic Project Page Template. */
+/*
+ * Result GIF slider: intentionally follows the Academic Project Page Template
+ * pattern (`.carousel.results-carousel > .item`) and Bulma Carousel behavior.
+ * Three items are visible on desktop and the arrows move one item at a time.
+ */
 .sequence-carousel {
   width: 100%;
   margin: 0 auto;
-  padding: 0 42px 34px;
+  padding: 0 46px 34px;
   overflow: hidden;
 }
-.sequence-carousel .item { padding: 0 8px; }
+.sequence-carousel .item {
+  box-sizing: border-box;
+  padding: 0 10px;
+}
 .sequence-carousel .slider { overflow: visible; }
 .sequence-carousel .slider-container { align-items: stretch; }
 .sequence-carousel .slider-item { height: auto; }
-.sequence-carousel .slider-item > .sequence-carousel-item,
 .sequence-carousel .sequence-carousel-item { height: 100%; }
-.sequence-carousel .video-card { height: 100%; display: flex; flex-direction: column; }
-.sequence-carousel .video-card img,
-.sequence-carousel .video-card video { display: block; flex: 0 0 auto; }
-.sequence-carousel .video-card figcaption { flex: 1 1 auto; }
+
+.sequence-result {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  text-align: center;
+}
+.sequence-media {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #0d1924;
+}
+.sequence-media img,
+.sequence-media video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: #0d1924;
+}
+.sequence-subtitle {
+  min-height: 48px;
+  padding: 11px 6px 0;
+  color: #586772;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.sequence-dataset {
+  color: var(--blue-dark);
+  font-weight: 800;
+}
+.sequence-name { color: var(--muted); }
+
 .sequence-carousel .slider-navigation-previous,
 .sequence-carousel .slider-navigation-next {
   width: 42px;
   height: 42px;
-  border: 1px solid #c9dce8;
-  background: rgba(255,255,255,.96);
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.97);
   color: var(--blue-dark);
-  box-shadow: 0 7px 24px rgba(31,78,111,.13);
+  box-shadow: 0 5px 18px rgba(31,78,111,.16);
+  transition: transform .18s ease, color .18s ease, box-shadow .18s ease;
 }
 .sequence-carousel .slider-navigation-previous:hover,
 .sequence-carousel .slider-navigation-next:hover {
-  border-color: var(--blue);
+  transform: scale(1.06);
   color: var(--blue);
+  box-shadow: 0 7px 22px rgba(31,78,111,.22);
 }
 .sequence-carousel .slider-pagination { bottom: 2px; }
-.sequence-carousel .slider-pagination .slider-page { background: #d5e4ed; }
+.sequence-carousel .slider-pagination .slider-page {
+  width: 8px;
+  height: 8px;
+  background: #d3e1ea;
+}
 .sequence-carousel .slider-pagination .slider-page.is-active { background: var(--blue); }
 
 .result-note { margin: 18px auto 0; text-align: center; color: var(--muted); }
@@ -264,17 +353,40 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
   background: #fff;
   box-shadow: var(--shadow);
 }
-.poster-frame iframe {
+.poster-frame img {
   display: block;
   width: 100%;
+  height: auto;
   aspect-ratio: 14 / 10;
-  min-height: 620px;
-  border: 0;
+  object-fit: contain;
   background: #fff;
 }
-.poster-open { margin: 12px 0 0; text-align: center; }
-.poster-open a { color: var(--blue); font-weight: 800; text-decoration: none; }
-.poster-open a:hover { text-decoration: underline; }
+.poster-open { margin: 16px 0 0; text-align: center; }
+.poster-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.poster-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 15px;
+  border: 1px solid #b9d7e9;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--blue);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 5px 16px rgba(31, 78, 111, .07);
+}
+.poster-action:hover {
+  border-color: var(--blue);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+.repo-poster .asset-loading { aspect-ratio: 14 / 10; }
 
 .bibtex-wrap { position: relative; }
 pre {
@@ -323,9 +435,9 @@ footer { padding: 27px 0; border-top: 1px solid #e5edf2; background: #fbfdfe; }
   .affiliation { font-size: 14px; }
   .section { padding: 64px 0; }
   .compact-section { padding-top: 40px; }
-  .video-grid, .video-grid-large { grid-template-columns: 1fr; }
-  .sequence-carousel { padding-left: 34px; padding-right: 34px; }
-  .poster-frame iframe { min-height: 420px; }
+  .video-grid, .video-grid-large, .featured-video-grid { grid-template-columns: 1fr; }
+  .sequence-carousel { padding-left: 36px; padding-right: 36px; }
+  .sequence-subtitle { min-height: 42px; }
   .method-copy { padding: 21px 20px; }
   .method-list .indent { margin-left: 7px; }
   .dataset-title-row { align-items: flex-end; }

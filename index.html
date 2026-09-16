@@ -8,9 +8,9 @@
   <meta property="og:description" content="Shared-weight Siamese FPNs and RAFT-style supervision for robust event-frame feature tracking." />
   <meta property="og:type" content="website" />
   <title>FESiamTrack | Enhancing Event-Frame Feature Tracking with Siamese FPN</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- Same carousel library used by the Academic Project Page Template. -->
+  <!-- Bulma Carousel is the carousel used by the Academic Project Page Template. -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.24/dist/css/bulma-carousel.min.css" />
+  <link rel="stylesheet" href="style.css" />
 
   <!-- MathJax renders the tracking update directly from LaTeX. -->
   <script>
@@ -39,13 +39,25 @@
       <div class="hero-links">
         <a class="pill" href="https://github.com/afotakis/FESiamTrack/blob/main/doc/ECCV_2026_Workshop_EBMV_Fotakis_Psarakis.pdf" target="_blank" rel="noopener">Paper</a>
         <a class="pill" href="https://github.com/afotakis/FESiamTrack" target="_blank" rel="noopener">Code</a>
-        <a class="pill" id="poster-link" href="docs/140x100%20ECCV%20Poster.pdf" target="_blank" rel="noopener">Poster</a>
+        <a class="pill" id="poster-link" href="#poster">Poster</a>
         <a class="pill" href="#bibtex">BibTeX</a>
       </div>
     </div>
   </header>
 
   <main>
+    <section class="section featured-results-section" id="featured-results">
+      <div class="container">
+        <div class="section-heading">
+          <span class="eyebrow">Qualitative Results</span>
+          <h2>Feature Tracking Across Datasets</h2>
+        </div>
+        <div id="featured-results-grid" class="featured-video-grid" aria-live="polite">
+          <div class="asset-loading featured-loading">Loading featured sequences from <code>docs/</code>…</div>
+        </div>
+      </div>
+    </section>
+
     <section class="section abstract-section" id="abstract">
       <div class="container narrow">
         <div class="section-heading">
@@ -142,12 +154,7 @@
         <div class="section-heading">
           <span class="eyebrow">Qualitative Results</span>
           <h2>Tracking Videos</h2>
-          <p>Sequences are loaded from <code>docs/FESiamTrack results/</code> in this project-page repository.</p>
-        </div>
-
-        <div id="cross-dataset-block" class="cross-dataset-block" hidden>
-          <h3 class="dataset-heading">Additional datasets</h3>
-          <div id="cross-dataset-grid" class="video-grid video-grid-large"></div>
+          <p>Sequences are loaded from <code>docs/FESiamTrack results/</code>. Each dataset uses the Academic Project Page Template-style carousel with three results visible on desktop.</p>
         </div>
 
         <div class="dataset-slider-block">
@@ -226,16 +233,19 @@
           <span class="eyebrow">ECCV 2026</span>
           <h2>Poster</h2>
         </div>
-        <div class="poster-frame">
-          <iframe
-            src="docs/140x100%20ECCV%20Poster.pdf#view=FitH"
-            title="ECCV 2026 poster — Enhancing Event-Frame Feature Tracking with Siamese FPN"
-            loading="lazy">
-          </iframe>
+        <figure class="poster-frame repo-poster" data-repo-poster>
+          <div class="asset-loading">Loading poster PNG from <code>docs/</code>…</div>
+          <img
+            id="poster-image"
+            src="docs/140x100%20ECCV%20Poster.png"
+            alt="ECCV 2026 poster — Enhancing Event-Frame Feature Tracking with Siamese FPN"
+            loading="lazy"
+            hidden />
+        </figure>
+        <div class="poster-open poster-actions">
+          <a id="poster-png-link" class="poster-action" href="docs/140x100%20ECCV%20Poster.png" target="_blank" rel="noopener">Open poster PNG</a>
+          <a class="poster-action" href="docs/140x100%20ECCV%20Poster.pdf" target="_blank" rel="noopener">Open poster PDF</a>
         </div>
-        <p class="poster-open">
-          <a href="docs/140x100%20ECCV%20Poster.pdf" target="_blank" rel="noopener">Open poster PDF</a>
-        </p>
       </div>
     </section>
 
