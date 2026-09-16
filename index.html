@@ -140,6 +140,10 @@
         <figure class="paper-figure wide-figure repo-figure" data-repo-figure="system-architecture">
           <div class="asset-loading">Loading architecture from <code>docs/</code>…</div>
           <img alt="System architecture and Frame Attention Module" hidden />
+          <figcaption class="paper-caption">
+            <span class="caption-label">Figure 1.</span>
+            Overview of the tracking pipeline for feature \(f_l\) at step \(j\). The reference patch \(P_l\) and event tensor \(V_{j,l}\) are processed by the <a href="#feature-network">Feature Network in Figure 2</a>, which matches their features and refines the result with a ConvLSTM to produce hidden state \(\mathbf{h}_{j,l}\) and cell output \(\mathbf{c}_{j,l}\). The Frame Attention Module combines \(\mathbf{h}_{j,l}\) with the previous track state \(\mathbf{s}_{j-1,l}\), aggregates information across tracks, and updates \(\mathbf{s}_{j,l}\). A linear head then predicts the incremental displacement \(\Delta\hat{\mathbf{x}}_{f_l}(t_j;\Theta^\star)\), which is accumulated using the <a href="#update-equation">tracking update equation</a>.
+          </figcaption>
         </figure>
 
         <div class="method-layout">
@@ -156,7 +160,7 @@
               <li class="indent">The network predicts the next incremental displacement.</li>
               <li class="indent">The feature position is updated according to:</li>
             </ul>
-            <div class="equation" aria-label="Feature position update equation">
+            <div class="equation" id="update-equation" aria-label="Feature position update equation">
               \[
                 \hat{\mathbf{x}}_{f_l}(t_j)
                 = \hat{\mathbf{x}}_{f_l}(t_{j-1})
@@ -168,10 +172,13 @@
             </ul>
           </div>
 
-          <figure class="paper-figure fpn-figure repo-figure" data-repo-figure="siamese-fpn">
+          <figure class="paper-figure fpn-figure repo-figure" id="feature-network" data-repo-figure="siamese-fpn">
             <div class="asset-loading">Loading Siamese FPN figure from <code>docs/</code>…</div>
             <img alt="Siamese shared-weight FPN" hidden />
-            <figcaption>Siamese Shared-Weight FPN</figcaption>
+            <figcaption class="paper-caption">
+              <span class="caption-label">Figure 2.</span>
+              Detailed architecture of the Feature Network. Modality-specific stems \(\phi_f\) and \(\phi_e\) process the reference patch \(P_l\) and event tensor \(V_{j,l}\) before a shared-weight Feature Pyramid Encoder. The frame branch produces the cached reference descriptor \(\mathbf{l}^{f}_{l}\), while the event branch is decoded into the spatial feature map \(D^{e}_{j,l}\). Correlating \(D^{e}_{j,l}\) with \(\mathbf{l}^{f}_{l}\) yields a correlation map \(C_{j,l}\), which are converted by spatial softmax into the matching-probability map \(\mathbb{P}_{j,l}\). This map is concatenated with \(D^{e}_{j,l}\), processed by two convolutional blocks, and passed to the ConvLSTM, which outputs the refined representation \(\mathbf{h}_{j,l}\) and updated state \(\mathbf{c}_{j,l}\).
+            </figcaption>
           </figure>
         </div>
       </div>
