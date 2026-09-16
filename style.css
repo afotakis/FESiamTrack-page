@@ -79,6 +79,10 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
 .affiliation { margin: 4px 0 0; color: #4d9bb8; font-size: 16px; }
 .hero-links { margin-top: 27px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
 .pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-width: 92px;
   padding: 10px 16px;
   border-radius: 10px;
@@ -90,6 +94,11 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
   box-shadow: 0 5px 18px rgba(34,82,118,.06);
   transition: .2s ease;
 }
+.pill i {
+  font-size: 1.08em;
+  line-height: 1;
+}
+
 .pill:hover { transform: translateY(-2px); border-color: #add4eb; color: var(--blue); box-shadow: 0 8px 24px rgba(34,82,118,.11); }
 
 .section { padding: 84px 0; }
