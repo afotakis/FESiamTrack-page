@@ -54,7 +54,7 @@ const CROSS_DATASETS = [
   { dataset: 'VECtor', name: 'robot-normal', keys: ['robot-normal', 'robot_normal'] }
 ];
 
-const MEDIA_EXTENSIONS = ['.gif', '.mp4', '.webm', '.png', '.jpg', '.jpeg'];
+const MEDIA_EXTENSIONS = ['.gif', '.mp4', '.webm'];
 const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 
 const normalize = (value) => value
@@ -112,17 +112,19 @@ function bestMatch(paths, extensions, positiveTerms, negativeTerms = []) {
 }
 
 function findSequenceAsset(paths, sequence) {
-  const resultFiles = paths.filter((path) =>
-    isUnder(path, REPO.resultsRoot) && MEDIA_EXTENSIONS.includes(pathExtension(path))
-  );
+  const resultFiles = paths
+    .filter((path) => isUnder(path, REPO.resultsRoot) && MEDIA_EXTENSIONS.includes(pathExtension(path)))
+    .sort((a, b) => {
+      // The project-page results are GIFs; prefer them when multiple exports exist.
+      const rank = (path) => pathExtension(path) === '.gif' ? 0 : pathExtension(path) === '.mp4' ? 1 : 2;
+      return rank(a) - rank(b) || a.localeCompare(b);
+    });
 
   const normalizedKeys = sequence.keys.map(normalize);
-  const exact = resultFiles.find((path) => {
+  return resultFiles.find((path) => {
     const p = normalize(path);
     return normalizedKeys.some((key) => p.includes(key));
-  });
-
-  return exact || null;
+  }) || null;
 }
 
 function setFigureAsset(wrapper, path) {
@@ -176,12 +178,6 @@ function resolveFigures(paths) {
       docsSvgs,
       ['.svg'],
       [['ablation results', 25], ['ablation', 20], ['results', 6], ['table', 3]]
-    ),
-    poster: bestMatch(
-      paths.filter((p) => isUnder(p, REPO.docsRoot)),
-      IMAGE_EXTENSIONS,
-      [['poster', 20], ['eccv', 4]],
-      [['architecture', 4], ['result', 4]]
     )
   };
 
@@ -193,12 +189,6 @@ function resolveFigures(paths) {
     }
   });
 
-  const posterLink = document.getElementById('poster-link');
-  if (posterLink && figureMatches.poster) {
-    posterLink.href = relativeAssetUrl(figureMatches.poster);
-    posterLink.target = '_blank';
-    posterLink.rel = 'noopener';
-  }
 }
 
 function createMedia(path, alt) {
@@ -241,78 +231,42 @@ function createSequenceCard(dataset, sequence, path) {
   return figure;
 }
 
-function chunks(array, size) {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) result.push(array.slice(i, i + size));
-  return result;
-}
-
-function setSliderState(slider, index) {
-  const slides = [...slider.querySelectorAll('.sequence-slide')];
-  if (!slides.length) return;
-
-  const normalizedIndex = (index + slides.length) % slides.length;
-  slider.dataset.index = String(normalizedIndex);
-  slides.forEach((slide, i) => slide.classList.toggle('is-active', i === normalizedIndex));
-
-  const controls = document.querySelector(`[data-controls-for="${slider.id}"]`);
-  if (controls) {
-    [...controls.querySelectorAll('.slider-dot')]
-      .forEach((dot, i) => dot.classList.toggle('is-active', i === normalizedIndex));
-
-    controls.hidden = slides.length <= 1;
+function initializeBulmaCarousel(slider, dataset) {
+  if (typeof bulmaCarousel === 'undefined') {
+    slider.innerHTML = `<div class="asset-loading asset-error">The results carousel library could not be loaded.</div>`;
+    return;
   }
+
+  // Match the Academic Project Page Template: one-item scroll, three visible
+  // result columns, infinite navigation, and no autoplay.
+  bulmaCarousel.attach(`#${slider.id}`, {
+    slidesToScroll: 1,
+    slidesToShow: 3,
+    infinite: true,
+    autoplay: false,
+    pagination: true,
+    navigation: true
+  });
+
+  slider.setAttribute('aria-label', `${dataset} qualitative results carousel`);
 }
 
 function buildSlider(slider, dataset, items) {
   slider.innerHTML = '';
 
   if (!items.length) {
-    slider.innerHTML = `<div class="asset-loading asset-error">No ${dataset} sequence files were found under <code>${REPO.resultsRoot}</code>.</div>`;
+    slider.innerHTML = `<div class="asset-loading asset-error">No ${dataset} sequence GIFs were found under <code>${REPO.resultsRoot}</code>.</div>`;
     return;
   }
 
-  const pages = chunks(items, 3);
-  pages.forEach((pageItems, pageIndex) => {
-    const slide = document.createElement('div');
-    slide.className = `sequence-slide${pageIndex === 0 ? ' is-active' : ''}`;
-    const grid = document.createElement('div');
-    grid.className = 'video-grid sequence-grid';
-
-    pageItems.forEach(({ sequence, path }) => {
-      grid.appendChild(createSequenceCard(dataset, sequence.name, path));
-    });
-
-    slide.appendChild(grid);
-    slider.appendChild(slide);
+  items.forEach(({ sequence, path }) => {
+    const item = document.createElement('div');
+    item.className = 'item sequence-carousel-item';
+    item.appendChild(createSequenceCard(dataset, sequence.name, path));
+    slider.appendChild(item);
   });
 
-  const controls = document.querySelector(`[data-controls-for="${slider.id}"]`);
-  if (controls) {
-    const dots = controls.querySelector('.slider-dots');
-    dots.innerHTML = '';
-
-    pages.forEach((_, index) => {
-      const dot = document.createElement('button');
-      dot.type = 'button';
-      dot.className = `slider-dot${index === 0 ? ' is-active' : ''}`;
-      dot.setAttribute('aria-label', `Show ${dataset} sequence group ${index + 1}`);
-      dot.addEventListener('click', () => setSliderState(slider, index));
-      dots.appendChild(dot);
-    });
-
-    controls.querySelector('[data-direction="prev"]')?.addEventListener('click', () => {
-      const current = Number(slider.dataset.index || 0);
-      setSliderState(slider, current - 1);
-    });
-    controls.querySelector('[data-direction="next"]')?.addEventListener('click', () => {
-      const current = Number(slider.dataset.index || 0);
-      setSliderState(slider, current + 1);
-    });
-  }
-
-  slider.dataset.index = '0';
-  setSliderState(slider, 0);
+  initializeBulmaCarousel(slider, dataset);
 }
 
 function resolveDatasetSliders(paths) {

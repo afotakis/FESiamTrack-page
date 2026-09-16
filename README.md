@@ -56,3 +56,10 @@ GIF, MP4, WebM, PNG, JPG and JPEG files are supported for qualitative results.
 ## GitHub Pages
 
 Enable GitHub Pages for the repository and publish from the branch containing `index.html`. If `index.html`, `style.css`, and `script.js` are in the repository root, the `docs/` paths used by the page resolve directly.
+
+
+## Result carousel and poster
+
+- EDS and EC qualitative results use the same **Bulma Carousel** library used by the Academic Project Page Template, with `slidesToShow: 3`, `slidesToScroll: 1`, infinite navigation, and autoplay disabled.
+- Each carousel item keeps the dataset name and sequence name under the GIF.
+- The poster is loaded directly from `docs/140x100 ECCV Poster.pdf`.

@@ -9,6 +9,8 @@
   <meta property="og:type" content="website" />
   <title>FESiamTrack | Enhancing Event-Frame Feature Tracking with Siamese FPN</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- Same carousel library used by the Academic Project Page Template. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.24/dist/css/bulma-carousel.min.css" />
 
   <!-- MathJax renders the tracking update directly from LaTeX. -->
   <script>
@@ -37,7 +39,7 @@
       <div class="hero-links">
         <a class="pill" href="https://github.com/afotakis/FESiamTrack/blob/main/doc/ECCV_2026_Workshop_EBMV_Fotakis_Psarakis.pdf" target="_blank" rel="noopener">Paper</a>
         <a class="pill" href="https://github.com/afotakis/FESiamTrack" target="_blank" rel="noopener">Code</a>
-        <a class="pill" id="poster-link" href="#poster">Poster</a>
+        <a class="pill" id="poster-link" href="docs/140x100%20ECCV%20Poster.pdf" target="_blank" rel="noopener">Poster</a>
         <a class="pill" href="#bibtex">BibTeX</a>
       </div>
     </div>
@@ -154,13 +156,8 @@
               <span class="dataset-kicker">Dataset</span>
               <h3>EDS</h3>
             </div>
-            <div class="slider-controls" data-controls-for="eds-slider" aria-label="EDS slider controls">
-              <button class="slider-button" type="button" data-direction="prev" aria-label="Previous EDS sequences">‹</button>
-              <div class="slider-dots" aria-hidden="true"></div>
-              <button class="slider-button" type="button" data-direction="next" aria-label="Next EDS sequences">›</button>
-            </div>
           </div>
-          <div id="eds-slider" class="sequence-slider" data-dataset="EDS">
+          <div id="eds-slider" class="carousel results-carousel sequence-carousel" data-dataset="EDS" aria-label="EDS qualitative results carousel">
             <div class="asset-loading">Loading all EDS sequences from <code>docs/FESiamTrack results/</code>…</div>
           </div>
         </div>
@@ -171,13 +168,8 @@
               <span class="dataset-kicker">Dataset</span>
               <h3>EC</h3>
             </div>
-            <div class="slider-controls" data-controls-for="ec-slider" aria-label="EC slider controls">
-              <button class="slider-button" type="button" data-direction="prev" aria-label="Previous EC sequences">‹</button>
-              <div class="slider-dots" aria-hidden="true"></div>
-              <button class="slider-button" type="button" data-direction="next" aria-label="Next EC sequences">›</button>
-            </div>
           </div>
-          <div id="ec-slider" class="sequence-slider" data-dataset="EC">
+          <div id="ec-slider" class="carousel results-carousel sequence-carousel" data-dataset="EC" aria-label="EC qualitative results carousel">
             <div class="asset-loading">Loading all EC sequences from <code>docs/FESiamTrack results/</code>…</div>
           </div>
         </div>
@@ -234,10 +226,16 @@
           <span class="eyebrow">ECCV 2026</span>
           <h2>Poster</h2>
         </div>
-        <a class="poster-preview repo-figure" data-repo-figure="poster" href="#" target="_blank" rel="noopener">
-          <div class="asset-loading">Loading poster from <code>docs/</code>…</div>
-          <img alt="ECCV 2026 poster for Enhancing Event-Frame Feature Tracking with Siamese FPN" hidden />
-        </a>
+        <div class="poster-frame">
+          <iframe
+            src="docs/140x100%20ECCV%20Poster.pdf#view=FitH"
+            title="ECCV 2026 poster — Enhancing Event-Frame Feature Tracking with Siamese FPN"
+            loading="lazy">
+          </iframe>
+        </div>
+        <p class="poster-open">
+          <a href="docs/140x100%20ECCV%20Poster.pdf" target="_blank" rel="noopener">Open poster PDF</a>
+        </p>
       </div>
     </section>
 
@@ -267,6 +265,7 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.24/dist/js/bulma-carousel.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
