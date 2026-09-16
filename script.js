@@ -49,36 +49,6 @@ const DATASETS = {
   ]
 };
 
-const FEATURED_EXAMPLES = [
-  // Restore the exact two-row showcase from the earlier page.
-  // Row 1 intentionally brings back the non-EDS/EC datasets.
-  {
-    dataset: 'TUM-VIE',
-    name: 'mocap-6dof',
-    keys: ['mocap-6dof_40_120', 'mocap-6dof', 'mocap_6dof'],
-    fallback: 'docs/mocap-6dof_40_120_tracks_pred_events.gif'
-  },
-  {
-    dataset: 'VECtor',
-    name: 'robot-normal',
-    keys: ['robot-normal_340_420', 'robot-normal', 'robot_normal'],
-    fallback: 'docs/robot-normal_340_420_tracks_pred_events.gif'
-  },
-
-  // Row 2 keeps one representative EDS and EC result, matching the old layout.
-  {
-    dataset: 'EDS',
-    name: 'peanuts_running_2360_2460',
-    keys: ['peanuts_running_2360_2460', 'pred_eds_peanuts_running', 'peanuts_running'],
-    fallback: 'docs/pred_eds_peanuts_running.gif'
-  },
-  {
-    dataset: 'EC',
-    name: 'shapes_6dof_485_565',
-    keys: ['shapes_6dof_485_565', 'pred_ec_shapes_6dof', 'shapes_6dof'],
-    fallback: 'docs/pred_ec_shapes_6dof.gif'
-  }
-];
 
 const MEDIA_EXTENSIONS = ['.gif', '.mp4', '.webm'];
 const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
@@ -137,24 +107,20 @@ function bestMatch(paths, extensions, positiveTerms, negativeTerms = []) {
   return candidates[0]?.path || null;
 }
 
-function findMediaAsset(paths, sequence, root = REPO.docsRoot) {
-  const mediaFiles = paths
-    .filter((path) => isUnder(path, root) && MEDIA_EXTENSIONS.includes(pathExtension(path)))
+function findSequenceAsset(paths, sequence) {
+  const resultFiles = paths
+    .filter((path) => isUnder(path, REPO.resultsRoot) && MEDIA_EXTENSIONS.includes(pathExtension(path)))
     .sort((a, b) => {
-      // Prefer GIFs because the repository showcase assets are primarily GIFs.
+      // The project-page results are GIFs; prefer them when multiple exports exist.
       const rank = (path) => pathExtension(path) === '.gif' ? 0 : pathExtension(path) === '.mp4' ? 1 : 2;
       return rank(a) - rank(b) || a.localeCompare(b);
     });
 
   const normalizedKeys = sequence.keys.map(normalize);
-  return mediaFiles.find((path) => {
+  return resultFiles.find((path) => {
     const p = normalize(path);
     return normalizedKeys.some((key) => p.includes(key));
   }) || null;
-}
-
-function findSequenceAsset(paths, sequence) {
-  return findMediaAsset(paths, sequence, REPO.resultsRoot);
 }
 
 function setFigureAsset(wrapper, path) {
@@ -219,38 +185,6 @@ function resolveFigures(paths) {
     }
   });
 
-}
-
-function resolvePoster(paths) {
-  const wrapper = document.querySelector('[data-repo-poster]');
-  if (!wrapper) return;
-
-  const docsPngs = paths.filter((p) => isUnder(p, REPO.docsRoot) && pathExtension(p) === '.png');
-  const posterPath = bestMatch(
-    docsPngs,
-    ['.png'],
-    [['140x100 eccv poster', 40], ['eccv poster', 30], ['poster', 20], ['140x100', 12]],
-    [['architecture', 8], ['result', 6], ['table', 6]]
-  ) || 'docs/140x100 ECCV Poster.png';
-
-  const img = wrapper.querySelector('#poster-image');
-  const loading = wrapper.querySelector('.asset-loading');
-  const pngLink = document.getElementById('poster-png-link');
-  const url = relativeAssetUrl(posterPath);
-
-  if (img) {
-    img.src = url;
-    img.hidden = false;
-    img.addEventListener('load', () => loading?.remove(), { once: true });
-    img.addEventListener('error', () => {
-      if (loading) {
-        loading.classList.add('asset-error');
-        loading.textContent = 'Unable to load the poster PNG from docs/.';
-      }
-      img.hidden = true;
-    }, { once: true });
-  }
-  if (pngLink) pngLink.href = url;
 }
 
 function createMedia(path, alt) {
@@ -369,90 +303,18 @@ function resolveDatasetSliders(paths) {
   });
 }
 
-function resolveFeaturedExamples(paths) {
-  const grid = document.getElementById('featured-results-grid');
-  if (!grid) return;
-
-  const items = FEATURED_EXAMPLES
-    .map((entry) => ({
-      ...entry,
-      // Search the complete docs/ tree. If the GitHub tree uses the old
-      // showcase filenames, the fallback preserves the earlier two-row layout.
-      path: findMediaAsset(paths, { keys: entry.keys }, REPO.docsRoot) || entry.fallback
-    }))
-    .filter((entry) => entry.path);
-
-  if (!items.length) {
-    grid.innerHTML = '<div class="asset-loading asset-error featured-loading">Unable to locate the featured GIFs under <code>docs/</code>.</div>';
-    return;
-  }
-
-  grid.innerHTML = '';
-  items.forEach((entry) => {
-    const card = document.createElement('figure');
-    card.className = 'featured-video-card';
-
-    const mediaWrap = document.createElement('div');
-    mediaWrap.className = 'featured-video-media';
-    mediaWrap.appendChild(createMedia(entry.path, `${entry.dataset} ${entry.name}`));
-    card.appendChild(mediaWrap);
-
-    const caption = document.createElement('figcaption');
-    const datasetName = document.createElement('strong');
-    datasetName.textContent = entry.dataset;
-    const sequenceName = document.createElement('span');
-    sequenceName.textContent = entry.name;
-    caption.append(datasetName, document.createTextNode(' — '), sequenceName);
-    card.appendChild(caption);
-
-    grid.appendChild(card);
-  });
-}
 
 async function initializeRepositoryAssets() {
   try {
     const paths = await fetchRepositoryTree();
     resolveFigures(paths);
-    resolvePoster(paths);
     resolveDatasetSliders(paths);
-    resolveFeaturedExamples(paths);
   } catch (error) {
     console.error('Unable to load repository assets:', error);
 
     document.querySelectorAll('.repo-figure').forEach((wrapper) => {
       showAssetError(wrapper, 'Unable to load this asset from docs/.');
     });
-
-    // Poster still has a deterministic same-repository fallback even if the
-    // GitHub API tree cannot be read (for example due to a temporary rate limit).
-    const posterWrapper = document.querySelector('[data-repo-poster]');
-    const posterImage = document.getElementById('poster-image');
-    if (posterWrapper && posterImage) {
-      posterImage.hidden = false;
-      posterImage.src = 'docs/140x100%20ECCV%20Poster.png';
-      posterWrapper.querySelector('.asset-loading')?.remove();
-    }
-
-    const featuredGrid = document.getElementById('featured-results-grid');
-    if (featuredGrid) {
-      featuredGrid.innerHTML = '';
-      FEATURED_EXAMPLES.forEach((entry) => {
-        const card = document.createElement('figure');
-        card.className = 'featured-video-card';
-        const mediaWrap = document.createElement('div');
-        mediaWrap.className = 'featured-video-media';
-        mediaWrap.appendChild(createMedia(entry.fallback, `${entry.dataset} ${entry.name}`));
-        card.appendChild(mediaWrap);
-        const caption = document.createElement('figcaption');
-        const datasetName = document.createElement('strong');
-        datasetName.textContent = entry.dataset;
-        const sequenceName = document.createElement('span');
-        sequenceName.textContent = entry.name;
-        caption.append(datasetName, document.createTextNode(' — '), sequenceName);
-        card.appendChild(caption);
-        featuredGrid.appendChild(card);
-      });
-    }
 
     ['EDS', 'EC'].forEach((dataset) => {
       const slider = document.getElementById(`${dataset.toLowerCase()}-slider`);

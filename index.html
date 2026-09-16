@@ -46,14 +46,56 @@
   </header>
 
   <main>
-    <section class="section featured-results-section" id="featured-results">
+
+    <section class="section featured-results-section" id="featured-tracking-videos">
       <div class="container">
         <div class="section-heading">
           <span class="eyebrow">Qualitative Results</span>
-          <h2>Feature Tracking Across Datasets</h2>
+          <h2>Tracking Videos</h2>
         </div>
-        <div id="featured-results-grid" class="featured-video-grid" aria-live="polite">
-          <div class="asset-loading featured-loading">Loading featured sequences from <code>docs/</code>…</div>
+
+        <div class="featured-video-grid">
+          <figure class="featured-video-card">
+            <div class="featured-video-media">
+              <img src="docs/mocap-6dof_40_120_tracks_pred_events.gif" alt="TUM-VIE mocap-6dof tracking result" loading="eager" />
+            </div>
+            <figcaption><strong>TUM-VIE</strong> — mocap-6dof</figcaption>
+          </figure>
+
+          <figure class="featured-video-card">
+            <div class="featured-video-media">
+              <img src="docs/robot-normal_340_420_tracks_pred_events.gif" alt="VECtor robot-normal tracking result" loading="eager" />
+            </div>
+            <figcaption><strong>VECtor</strong> — robot-normal</figcaption>
+          </figure>
+
+          <figure class="featured-video-card">
+            <div class="featured-video-media">
+              <img src="docs/pred_eds_peanuts_running.gif" alt="EDS peanuts_running tracking result" loading="eager" />
+            </div>
+            <figcaption><strong>EDS</strong> — peanuts_running</figcaption>
+          </figure>
+
+          <figure class="featured-video-card">
+            <div class="featured-video-media">
+              <img src="docs/pred_eds_ziggy.gif" alt="EDS ziggy_in_the_arena tracking result" loading="lazy" />
+            </div>
+            <figcaption><strong>EDS</strong> — ziggy_in_the_arena</figcaption>
+          </figure>
+
+          <figure class="featured-video-card">
+            <div class="featured-video-media">
+              <img src="docs/pred_ec_shapes_6dof.gif" alt="EC shapes_6dof tracking result" loading="lazy" />
+            </div>
+            <figcaption><strong>EC</strong> — shapes_6dof</figcaption>
+          </figure>
+
+          <figure class="featured-video-card">
+            <div class="featured-video-media">
+              <img src="docs/pred_ec_boxes_rotation.gif" alt="EC boxes_rotation tracking result" loading="lazy" />
+            </div>
+            <figcaption><strong>EC</strong> — boxes_rotation</figcaption>
+          </figure>
         </div>
       </div>
     </section>
@@ -153,7 +195,7 @@
       <div class="container">
         <div class="section-heading">
           <span class="eyebrow">Qualitative Results</span>
-          <h2>Tracking Videos</h2>
+          <h2>EDS &amp; EC Benchmark Sequences</h2>
           <p>Sequences are loaded from <code>docs/FESiamTrack results/</code>. Each dataset uses the Academic Project Page Template-style carousel with three results visible on desktop.</p>
         </div>
 
@@ -233,17 +275,14 @@
           <span class="eyebrow">ECCV 2026</span>
           <h2>Poster</h2>
         </div>
-        <figure class="poster-frame repo-poster" data-repo-poster>
-          <div class="asset-loading">Loading poster PNG from <code>docs/</code>…</div>
+        <figure class="poster-frame">
           <img
-            id="poster-image"
             src="docs/140x100%20ECCV%20Poster.png"
             alt="ECCV 2026 poster — Enhancing Event-Frame Feature Tracking with Siamese FPN"
-            loading="lazy"
-            hidden />
+            loading="lazy" />
         </figure>
         <div class="poster-open poster-actions">
-          <a id="poster-png-link" class="poster-action" href="docs/140x100%20ECCV%20Poster.png" target="_blank" rel="noopener">Open poster PNG</a>
+          <a class="poster-action" href="docs/140x100%20ECCV%20Poster.png" target="_blank" rel="noopener">Open poster PNG</a>
           <a class="poster-action" href="docs/140x100%20ECCV%20Poster.pdf" target="_blank" rel="noopener">Open poster PDF</a>
         </div>
       </div>

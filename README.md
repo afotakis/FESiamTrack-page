@@ -14,7 +14,6 @@ FESiamTrack-page/
 └── docs/
     ├── ... architecture PNGs ...
     ├── ... benchmarking/ablation SVGs ...
-    ├── 140x100 ECCV Poster.png
     ├── 140x100 ECCV Poster.pdf
     └── FESiamTrack results/
         └── ... EDS / EC sequence media ...
@@ -62,8 +61,27 @@ Enable GitHub Pages for the repository and publish from the branch containing `i
 
 - EDS and EC qualitative results use the same **Bulma Carousel** result-slider pattern as the Academic Project Page Template: `slidesToScroll: 1`, three visible items on desktop, infinite looping, navigation arrows, pagination dots, and autoplay disabled.
 - Each carousel item keeps the dataset name and sequence name centered directly under the GIF.
-- The page displays the PNG poster from `docs/140x100 ECCV Poster.png` and provides separate **Open poster PNG** and **Open poster PDF** links. The PDF remains `docs/140x100 ECCV Poster.pdf`.
+- The poster is loaded directly from the exact file `docs/140x100 ECCV Poster.pdf`.
+
+
 ## Featured GIF showcase
 
-The page restores the earlier **two-row, two-column qualitative showcase before the Abstract**. Row 1 brings back the non-EDS/EC examples: TUM-VIE `mocap-6dof` and VECtor `robot-normal`. Row 2 shows EDS `peanuts_running_2360_2460` and EC `shapes_6dof_485_565`. Each GIF keeps the dataset and sequence name directly underneath. The full EDS/EC carousels remain later on the page and continue loading all benchmark sequences from `docs/FESiamTrack results/`.
+Before the Abstract, the page restores the earlier **six-GIF, two-row Tracking Videos section** with three columns per row on desktop:
 
+- TUM-VIE — `mocap-6dof` → `docs/mocap-6dof_40_120_tracks_pred_events.gif`
+- VECtor — `robot-normal` → `docs/robot-normal_340_420_tracks_pred_events.gif`
+- EDS — `peanuts_running` → `docs/pred_eds_peanuts_running.gif`
+- EDS — `ziggy_in_the_arena` → `docs/pred_eds_ziggy.gif`
+- EC — `shapes_6dof` → `docs/pred_ec_shapes_6dof.gif`
+- EC — `boxes_rotation` → `docs/pred_ec_boxes_rotation.gif`
+
+Each GIF shows the dataset and sequence name directly underneath. The complete EDS and EC sliders remain later on the page.
+
+## Poster
+
+The poster section displays `docs/140x100 ECCV Poster.png` directly as an image. Two buttons below it provide both formats:
+
+- **Open poster PNG** → `docs/140x100 ECCV Poster.png`
+- **Open poster PDF** → `docs/140x100 ECCV Poster.pdf`
+
+The PDF is no longer embedded in the page.
